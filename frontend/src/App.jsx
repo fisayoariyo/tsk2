@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import { INITIAL_FLIGHTS } from './data/mockFlights';
 
+function pageFromPath(pathname = window.location.pathname) {
+  return pathname.replace(/\/+$/, '').endsWith('/search') ? 'search' : 'home';
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'search'
+  const [currentPage, setCurrentPage] = useState(() => pageFromPath());
   const [currentTab, setCurrentTab] = useState('Flights');
   const [searchQuery, setSearchQuery] = useState({
     from: 'London (Any)',
@@ -26,7 +30,37 @@ export default function App() {
     maxDuration: 36
   });
 
-  const [flights, setFlights] = useState(INITIAL_FLIGHTS);
+  const [flights] = useState(INITIAL_FLIGHTS);
+
+  // Keep React page state in sync with browser history (Back/Forward)
+  useEffect(() => {
+    if (!window.history.state?.page) {
+      window.history.replaceState({ page: pageFromPath() }, '', window.location.pathname || '/');
+    }
+
+    const onPopState = (event) => {
+      const page = event.state?.page || pageFromPath();
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const goHome = useCallback((replace = false) => {
+    setCurrentPage('home');
+    setCurrentTab('Flights');
+    const method = replace ? 'replaceState' : 'pushState';
+    window.history[method]({ page: 'home' }, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const goSearch = useCallback(() => {
+    setCurrentPage('search');
+    window.history.pushState({ page: 'search' }, '', '/search');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Filter & Sort logic
   const filteredFlights = React.useMemo(() => {
@@ -66,8 +100,7 @@ export default function App() {
       origin: params?.from || 'London (Any)',
       destination: params?.to || 'Mumbai (BOM)'
     });
-    setCurrentPage('search');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goSearch();
   };
 
   const handleSelectPopularRoute = (route) => {
@@ -76,8 +109,14 @@ export default function App() {
       from: 'United Kingdom (UK)',
       to: `${route.to} (${route.code})`
     }));
-    setCurrentPage('search');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goSearch();
+  };
+
+  const handleSelectTab = (tab) => {
+    setCurrentTab(tab);
+    if (tab === 'Flights' && currentPage !== 'home') {
+      goHome();
+    }
   };
 
   return (
@@ -85,11 +124,8 @@ export default function App() {
       {/* Top Navigation Header */}
       <Header
         currentTab={currentTab}
-        onSelectTab={setCurrentTab}
-        onNavigateHome={() => {
-          setCurrentPage('home');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onSelectTab={handleSelectTab}
+        onNavigateHome={() => goHome()}
       />
 
       {/* Main Page View */}
@@ -98,6 +134,7 @@ export default function App() {
           <HomePage
             onSearch={handleStartSearch}
             onSelectPopularRoute={handleSelectPopularRoute}
+            onNavigateHome={() => goHome()}
           />
         ) : (
           <SearchPage
@@ -107,10 +144,7 @@ export default function App() {
             onSortChange={setSortBy}
             filters={filters}
             onFilterChange={setFilters}
-            onModifySearch={() => {
-              setCurrentPage('home');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onModifySearch={() => goHome()}
           />
         )}
       </div>

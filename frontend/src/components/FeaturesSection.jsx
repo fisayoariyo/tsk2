@@ -1,7 +1,7 @@
 import React from 'react';
 import { Ticket, Zap, ShieldCheck, Headphones, ChevronRight, TowerControl, Users } from 'lucide-react';
 
-export default function FeaturesSection() {
+export default function FeaturesSection({ onNavigateHome }) {
   const features = [
     {
       id: 1,
@@ -34,9 +34,21 @@ export default function FeaturesSection() {
       
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 mb-6 font-medium">
-        <a href="#home" className="hover:text-gray-900 underline underline-offset-2">Home</a>
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          className="hover:text-gray-900 underline underline-offset-2"
+        >
+          Home
+        </button>
         <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-        <a href="#flights" className="hover:text-gray-900 underline underline-offset-2 text-[#FF5722]">Flights</a>
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          className="hover:text-gray-900 underline underline-offset-2 text-[#FF5722]"
+        >
+          Flights
+        </button>
         <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
         <span className="text-gray-900 font-semibold">United Kingdom</span>
       </nav>
