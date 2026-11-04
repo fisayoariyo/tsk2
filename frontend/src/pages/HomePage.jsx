@@ -10,14 +10,12 @@ export default function HomePage({ onSearch, onSelectPopularRoute }) {
       {/* Hero with flight search */}
       <HeroSection onSearch={onSearch} />
 
-      {/* Feature highlight cards and action cards */}
-      <FeaturesSection />
-
-      {/* Popular routes from UK */}
-      <PopularRoutesSection onSelectRoute={onSelectPopularRoute} />
-
-      {/* Exclusive Fare Alerts banner and Airline partner logos */}
-      <FareAlertsAndAirlines />
+      {/* Below-hero content stays under search dropdowns */}
+      <div className="relative z-0">
+        <FeaturesSection />
+        <PopularRoutesSection onSelectRoute={onSelectPopularRoute} />
+        <FareAlertsAndAirlines />
+      </div>
     </div>
   );
 }

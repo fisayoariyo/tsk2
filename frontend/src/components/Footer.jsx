@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Globe,
   ChevronDown,
@@ -9,8 +9,16 @@ import {
   Twitter,
   Linkedin
 } from 'lucide-react';
+import { LOCALES, getLocaleById } from '../data/locales';
+import FlagIcon from './FlagIcon';
 
 export default function Footer() {
+  const [localeId, setLocaleId] = useState('in');
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+
+  const locale = getLocaleById(localeId);
+
   const footerLinks = {
     Company: ['About Us', 'Careers', 'Press', 'Blog'],
     'Help & Support': ['Contact Us', 'FAQs', 'Booking Guide', 'Cancellation & Refunds'],
@@ -96,17 +104,65 @@ export default function Footer() {
           <p>© 2026 Flyhigh. All rights reserved.</p>
 
           <div className="flex items-center space-x-3">
-            <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-gray-800 text-gray-300 hover:text-white transition text-xs">
-              <Globe className="w-3.5 h-3.5" />
-              <span>English (IN)</span>
-              <ChevronDown className="w-3 h-3 text-gray-400" />
-            </button>
+            {/* Language — globe + label */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setShowLangMenu(!showLangMenu); setShowCurrencyMenu(false); }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-gray-600 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white transition text-xs"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>{locale.lang}</span>
+                <ChevronDown className="w-3 h-3 text-gray-400" />
+              </button>
+              {showLangMenu && (
+                <div className="absolute right-0 bottom-full mb-2 w-44 bg-[#1E293B] border border-gray-600 rounded-lg shadow-xl py-1 z-50">
+                  {LOCALES.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => { setLocaleId(opt.id); setShowLangMenu(false); }}
+                      className={`w-full text-left px-3 py-2 hover:bg-[#FF5722]/20 flex items-center justify-between ${
+                        localeId === opt.id ? 'text-orange-400' : 'text-gray-200'
+                      }`}
+                    >
+                      <span>{opt.lang}</span>
+                      <FlagIcon Flag={opt.Flag} title={opt.countryCode} className="w-4 h-3" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-gray-800 text-gray-300 hover:text-white transition text-xs">
-              <span>🇮🇳</span>
-              <span className="font-semibold">INR</span>
-              <ChevronDown className="w-3 h-3 text-gray-400" />
-            </button>
+            {/* Currency — real flag + code */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setShowCurrencyMenu(!showCurrencyMenu); setShowLangMenu(false); }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-gray-600 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white transition text-xs"
+              >
+                <FlagIcon Flag={locale.Flag} title={locale.countryCode} className="w-4 h-3" />
+                <span className="font-semibold">{locale.currency}</span>
+                <ChevronDown className="w-3 h-3 text-gray-400" />
+              </button>
+              {showCurrencyMenu && (
+                <div className="absolute right-0 bottom-full mb-2 w-36 bg-[#1E293B] border border-gray-600 rounded-lg shadow-xl py-1 z-50">
+                  {LOCALES.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => { setLocaleId(opt.id); setShowCurrencyMenu(false); }}
+                      className={`w-full text-left px-3 py-2 hover:bg-[#FF5722]/20 flex items-center justify-between ${
+                        localeId === opt.id ? 'text-orange-400' : 'text-gray-200'
+                      }`}
+                    >
+                      <span className="font-semibold">{opt.currency}</span>
+                      <FlagIcon Flag={opt.Flag} title={opt.countryCode} className="w-4 h-3" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

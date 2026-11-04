@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Plane, Bed, Car, Heart, ChevronDown, Send } from 'lucide-react';
+import { LOCALES, getLocaleById } from '../data/locales';
+import FlagIcon from './FlagIcon';
 
 export default function Header({ currentTab = 'Flights', onSelectTab, onNavigateHome }) {
   const [activeTab, setActiveTab] = useState(currentTab);
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('INR');
-  const [selectedLang, setSelectedLang] = useState('English (IN)');
+  const [localeId, setLocaleId] = useState('in');
+
+  const locale = getLocaleById(localeId);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -81,41 +84,34 @@ export default function Header({ currentTab = 'Flights', onSelectTab, onNavigate
             Help
           </a>
 
-          {/* Language & Currency Pill */}
+          {/* Language & Currency Pill — real flag SVG */}
           <div className="relative">
             <button
               onClick={() => setShowLangMenu(!showLangMenu)}
-              className="flex items-center space-x-2 px-3 py-1.5 border border-gray-200 rounded-full text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-2 px-3 py-1.5 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <span>{selectedLang}</span>
-              <span className="inline-flex items-center justify-center text-xs">🇮🇳</span>
-              <span className="font-semibold text-gray-900">{selectedCurrency}</span>
+              <span>{locale.lang}</span>
+              <FlagIcon Flag={locale.Flag} title={locale.countryCode} />
+              <span className="font-semibold text-gray-900">{locale.currency}</span>
               <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50 text-sm">
-                <button
-                  onClick={() => { setSelectedLang('English (IN)'); setSelectedCurrency('INR'); setShowLangMenu(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between"
-                >
-                  <span>English (IN) - ₹ INR</span>
-                  <span>🇮🇳</span>
-                </button>
-                <button
-                  onClick={() => { setSelectedLang('English (UK)'); setSelectedCurrency('GBP'); setShowLangMenu(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between"
-                >
-                  <span>English (UK) - £ GBP</span>
-                  <span>🇬🇧</span>
-                </button>
-                <button
-                  onClick={() => { setSelectedLang('English (US)'); setSelectedCurrency('USD'); setShowLangMenu(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between"
-                >
-                  <span>English (US) - $ USD</span>
-                  <span>🇺🇸</span>
-                </button>
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50 text-sm">
+                {LOCALES.map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => { setLocaleId(opt.id); setShowLangMenu(false); }}
+                    className={`w-full text-left px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-3 ${
+                      localeId === opt.id ? 'text-orange-600 bg-orange-50/60' : 'text-gray-800'
+                    }`}
+                  >
+                    <span className="font-medium">
+                      {opt.lang} · {opt.symbol} {opt.currency}
+                    </span>
+                    <FlagIcon Flag={opt.Flag} title={opt.countryCode} />
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -129,7 +125,7 @@ export default function Header({ currentTab = 'Flights', onSelectTab, onNavigate
           </button>
 
           {/* Log In Button */}
-          <button className="px-5 py-1.5 border border-gray-300 rounded-full text-sm font-semibold text-gray-900 hover:border-gray-400 hover:bg-gray-50 transition-all">
+          <button className="px-5 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 hover:border-gray-400 hover:bg-gray-50 transition-all">
             Log in
           </button>
         </div>

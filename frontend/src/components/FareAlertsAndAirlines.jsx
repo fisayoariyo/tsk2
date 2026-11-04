@@ -82,25 +82,25 @@ export default function FareAlertsAndAirlines() {
       </div>
 
       {/* Book with confidence Section */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-2 pb-4">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-5 pt-2 pb-4">
         
         {/* Title */}
         <h3 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight shrink-0">
           Book with confidence
         </h3>
 
-        {/* Airline Logo Badges Row */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 flex-1 max-w-4xl">
+        {/* Airline Logo Badges — single readable row */}
+        <div className="flex flex-nowrap items-center justify-center gap-2.5 flex-1 min-w-0 overflow-x-auto">
           {airlines.map((airline) => (
             <div
               key={airline.name}
-              className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 h-12 min-w-[108px] flex items-center justify-center shadow-xs hover:border-gray-300 hover:shadow-sm transition"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-2 h-11 w-[102px] shrink-0 flex items-center justify-center shadow-xs hover:border-gray-300 hover:shadow-sm transition"
               title={airline.name}
             >
               <img
                 src={airline.logo}
                 alt={airline.name}
-                className="max-h-7 max-w-[100px] w-auto object-contain"
+                className="max-h-6 max-w-[86px] w-auto object-contain"
               />
             </div>
           ))}
@@ -110,7 +110,7 @@ export default function FareAlertsAndAirlines() {
         <a
           href="#airlines"
           onClick={(e) => e.preventDefault()}
-          className="text-[#FF5722] hover:text-[#E64A19] font-bold text-sm sm:text-base flex items-center space-x-1 shrink-0 transition"
+          className="text-[#FF5722] hover:text-[#E64A19] font-bold text-sm sm:text-base flex items-center space-x-1 shrink-0 transition whitespace-nowrap"
         >
           <span>View all airlines</span>
           <ChevronRight className="w-5 h-5" />

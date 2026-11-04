@@ -42,18 +42,15 @@ export default function HeroSection({ onSearch }) {
   };
 
   return (
-    <div className="relative w-full pt-8 pb-14 px-6 sm:px-10 lg:px-12 overflow-hidden shadow-inner">
-      {/* Full-bleed hero photographic background (attached airliner banner) */}
-      <div
-        className="absolute inset-0 bg-cover bg-[center_top] bg-no-repeat scale-[1.02]"
-        style={{ backgroundImage: "url('/hero-bg.jpg')" }}
-        aria-hidden="true"
-      />
-      {/* Light left wash only — keeps headline readable without hiding the plane */}
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-[#E84A1A]/45) via-transparent to-transparent"
-        aria-hidden="true"
-      />
+    <div className="relative z-20 w-full pt-8 pb-14 px-6 sm:px-10 lg:px-12 shadow-inner">
+      {/* Clip background only — keep dropdowns visible above the white content below */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div
+          className="absolute inset-0 bg-cover bg-[center_top] bg-no-repeat scale-[1.02]"
+          style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#E84A1A]/45) via-transparent to-transparent" />
+      </div>
 
       <div className="max-w-[1320px] mx-auto relative z-10">
         
@@ -115,9 +112,9 @@ export default function HeroSection({ onSearch }) {
           </div>
 
           {/* Main Search Input Strip Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
+          <div className="relative z-30 bg-white rounded-2xl shadow-xl p-3 sm:p-4 overflow-visible">
             
-            <div className="flex flex-col xl:flex-row xl:items-stretch gap-2">
+            <div className="flex flex-col xl:flex-row xl:items-stretch gap-2 overflow-visible">
               
               {/* From + To pair with overlapping swap — widest segment */}
               <div className="relative flex flex-col sm:flex-row flex-[1.7] min-w-0 gap-2 sm:gap-0">
@@ -194,7 +191,7 @@ export default function HeroSection({ onSearch }) {
               </div>
 
               {/* Travellers & cabin class — keep existing width */}
-              <div className="relative xl:w-[210px] xl:flex-none min-w-0">
+              <div className="relative xl:w-[210px] xl:flex-none min-w-0 z-50">
                 <button
                   type="button"
                   onClick={() => { setShowTravellerMenu(!showTravellerMenu); setShowTripTypeMenu(false); }}
@@ -213,7 +210,7 @@ export default function HeroSection({ onSearch }) {
                 </button>
 
                 {showTravellerMenu && (
-                  <div className="absolute left-0 right-0 mt-1.5 bg-white rounded-xl shadow-lg border border-gray-100 p-3 z-40 text-sm space-y-3">
+                  <div className="absolute left-0 right-0 mt-1.5 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 z-[60] text-sm space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-700">Adults</span>
                       <div className="flex items-center space-x-2">
