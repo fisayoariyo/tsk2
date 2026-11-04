@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle2, Send, ChevronRight } from 'lucide-react';
 
+const AIRLINES = [
+  { name: 'British Airways', logo: '/logos/british-airways.svg' },
+  { name: 'Emirates', logo: '/logos/emirates-thumb.png' },
+  { name: 'Qatar Airways', logo: '/logos/qatar-airways.svg' },
+  { name: 'Lufthansa', logo: '/logos/lufthansa-mark.svg' },
+  { name: 'IndiGo', logo: '/logos/indigo.svg' },
+  { name: 'Air India', logo: '/logos/air-india.svg' }
+];
+
+function AirlineBadge({ airline }) {
+  return (
+    <div
+      className="bg-white border border-gray-200 rounded-xl px-3 py-2 h-11 w-[102px] shrink-0 flex items-center justify-center shadow-xs"
+      title={airline.name}
+    >
+      <img
+        src={airline.logo}
+        alt={airline.name}
+        className="max-h-6 max-w-[86px] w-auto object-contain"
+      />
+    </div>
+  );
+}
+
 export default function FareAlertsAndAirlines() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -16,14 +40,8 @@ export default function FareAlertsAndAirlines() {
     }
   };
 
-  const airlines = [
-    { name: 'British Airways', logo: '/logos/british-airways.svg' },
-    { name: 'Emirates', logo: '/logos/emirates-thumb.png' },
-    { name: 'Qatar Airways', logo: '/logos/qatar-airways.svg' },
-    { name: 'Lufthansa', logo: '/logos/lufthansa-mark.svg' },
-    { name: 'IndiGo', logo: '/logos/indigo.svg' },
-    { name: 'Air India', logo: '/logos/air-india.svg' }
-  ];
+  // Duplicate set for seamless infinite loop
+  const loopAirlines = [...AIRLINES, ...AIRLINES];
 
   return (
     <section className="max-w-[1320px] mx-auto px-6 sm:px-10 lg:px-12 py-6 space-y-12">
@@ -31,7 +49,6 @@ export default function FareAlertsAndAirlines() {
       {/* Exclusive Flight Deals & Fare Alerts Banner */}
       <div className="bg-[#FFF4EE] border border-[#FFE2D4] rounded-3xl p-6 sm:p-10 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
         
-        {/* Left Side Copy */}
         <div className="max-w-xl z-10">
           <h3 className="text-2xl sm:text-3xl font-extrabold text-[#E04006] tracking-tight leading-tight">
             Exclusive Flight Deals<br className="hidden sm:inline" /> & Fare Alerts
@@ -41,9 +58,7 @@ export default function FareAlertsAndAirlines() {
           </p>
         </div>
 
-        {/* Right Side Input & Paper Plane Doodle */}
         <div className="w-full lg:w-auto flex items-center justify-center lg:justify-end space-x-6 z-10">
-          
           {subscribed ? (
             <div className="flex items-center space-x-2 bg-white px-6 py-3.5 rounded-2xl shadow-sm text-green-700 font-semibold border border-green-200">
               <CheckCircle2 className="w-5 h-5 text-green-600" />
@@ -71,42 +86,27 @@ export default function FareAlertsAndAirlines() {
             </form>
           )}
 
-          {/* Paper Plane flight-path accent */}
           <div className="hidden sm:flex items-center shrink-0 opacity-80 text-[#FF5722]">
             <div className="w-10 border-t-2 border-dashed border-[#FF5722] mr-1" />
             <Send className="w-8 h-8 -rotate-12" strokeWidth={2} />
           </div>
-
         </div>
-
       </div>
 
-      {/* Book with confidence Section */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-5 pt-2 pb-4">
-        
-        {/* Title */}
+      {/* Book with confidence — looping logo marquee */}
+      <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6 pt-2 pb-4">
         <h3 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight shrink-0">
           Book with confidence
         </h3>
 
-        {/* Airline Logo Badges — single readable row */}
-        <div className="flex flex-nowrap items-center justify-center gap-2.5 flex-1 min-w-0 overflow-x-auto">
-          {airlines.map((airline) => (
-            <div
-              key={airline.name}
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 h-11 w-[102px] shrink-0 flex items-center justify-center shadow-xs hover:border-gray-300 hover:shadow-sm transition"
-              title={airline.name}
-            >
-              <img
-                src={airline.logo}
-                alt={airline.name}
-                className="max-h-6 max-w-[86px] w-auto object-contain"
-              />
-            </div>
-          ))}
+        <div className="airline-marquee relative flex-1 min-w-0 w-full overflow-hidden">
+          <div className="airline-marquee-track flex items-center gap-2.5 w-max">
+            {loopAirlines.map((airline, i) => (
+              <AirlineBadge key={`${airline.name}-${i}`} airline={airline} />
+            ))}
+          </div>
         </div>
 
-        {/* View all airlines link */}
         <a
           href="#airlines"
           onClick={(e) => e.preventDefault()}
@@ -115,7 +115,6 @@ export default function FareAlertsAndAirlines() {
           <span>View all airlines</span>
           <ChevronRight className="w-5 h-5" />
         </a>
-
       </div>
 
     </section>

@@ -39,3 +39,36 @@ input[type="radio"] {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Hide scrollbar utility (mobile header tabs) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Airline logo infinite marquee — pause on hover */
+@keyframes airline-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.airline-marquee-track {
+  animation: airline-marquee 28s linear infinite;
+}
+
+.airline-marquee:hover .airline-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .airline-marquee-track {
+    animation: none;
+  }
+}
