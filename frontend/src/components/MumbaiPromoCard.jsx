@@ -1,9 +1,9 @@
 import React from 'react';
 import { ArrowRight, Plane } from 'lucide-react';
 
-export default function MumbaiPromoCard({ city = 'Mumbai', onExplore }) {
+export default function MumbaiPromoCard({ city = 'Mumbai', onExplore, className = '' }) {
   return (
-    <aside className="w-full lg:w-[280px] shrink-0">
+    <aside className={`w-full lg:w-[280px] shrink-0 ${className}`}>
       <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-xs relative flex flex-col group hover:shadow-md transition-all">
         
         {/* Top Content */}

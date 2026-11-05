@@ -1,272 +1,194 @@
 import React, { useState } from 'react';
-import { Heart, Globe, ArrowRight, Info, ChevronDown } from 'lucide-react';
+import { Heart, Globe, ArrowRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { sortLabel } from '../utils/flightResults';
+
+const SORTS = [
+  { key: 'airline', label: 'Airline' },
+  { key: 'departure', label: 'Departure' },
+  { key: 'arrival', label: 'Arrival' },
+  { key: 'duration', label: 'Duration' },
+  { key: 'price', label: 'Price' }
+];
+
+function Leg({ leg }) {
+  if (!leg) return null;
+  return (
+    <div className="flex items-center justify-between sm:justify-start sm:space-x-8 text-sm">
+      <div className="w-24">
+        <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">{leg.departureTime}</div>
+        <div className="text-xs font-semibold text-gray-500">{leg.fromCity ? `${leg.fromCity} (${leg.fromCode})` : leg.fromCode}</div>
+      </div>
+      <div className="flex-1 max-w-[180px] sm:max-w-[220px] text-center">
+        <div className="text-xs font-medium text-gray-500">{leg.duration}</div>
+        <div className="relative my-1 flex items-center">
+          <div className="w-full h-[1.5px] bg-gray-300" />
+          <ArrowRight className="w-3.5 h-3.5 text-gray-400 absolute right-0" />
+        </div>
+        <div className={`text-xs font-bold ${leg.stops === 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
+          {leg.stopType}
+        </div>
+      </div>
+      <div className="w-28 text-right sm:text-left">
+        <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">
+          {leg.arrivalTime}
+          {leg.dayOffset && <span className="text-xs font-bold text-gray-700 align-super ml-0.5">{leg.dayOffset}</span>}
+        </div>
+        <div className="text-xs font-semibold text-gray-500">{leg.toCity ? `${leg.toCity} (${leg.toCode})` : leg.toCode}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function FlightResultsList({
   flights = [],
-  sortBy = 'best',
+  totalCount = 0,
+  sortBy,
   onSortChange,
-  onSelectFlight
+  onSelectFlight,
+  onClearFilters,
+  filtersActive = false,
+  searching = false
 }) {
   const [favorites, setFavorites] = useState({});
+  const activeLabel = sortLabel(sortBy);
 
-  const toggleFavorite = (flightKey, e) => {
-    e.stopPropagation();
-    setFavorites(prev => ({ ...prev, [flightKey]: !prev[flightKey] }));
+  const toggleFavorite = (flightKey, event) => {
+    event.stopPropagation();
+    setFavorites((prev) => ({ ...prev, [flightKey]: !prev[flightKey] }));
   };
 
   return (
-    <div className="flex-1 min-w-0 space-y-4">
-      
-      {/* Results Header: Count & Sort indicator */}
+    <div className={`flex-1 min-w-0 space-y-4 ${searching ? 'opacity-60' : ''}`} aria-busy={searching}>
       <div className="flex items-center justify-between text-xs sm:text-sm text-gray-700 font-medium">
-        <div className="flex items-center space-x-1.5">
-          <span className="font-bold text-gray-900">126 results</span>
+        <div className="flex items-center space-x-1.5" aria-live="polite">
+          <span className="font-bold text-gray-900">{flights.length} results</span>
           <span>sorted by:</span>
-          <span className="font-bold text-gray-900">Best</span>
-          <button title="Sorting explanation" className="text-gray-400 hover:text-gray-600">
-            <Info className="w-3.5 h-3.5" />
-          </button>
+          <span className="font-bold text-gray-900">{activeLabel}</span>
         </div>
-
-        <button className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 text-xs sm:text-sm font-semibold">
-          <span>Show price per traveller</span>
-          <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-        </button>
+        {totalCount > flights.length && (
+          <span className="text-xs text-gray-500">{totalCount} before filters</span>
+        )}
       </div>
 
-      {/* Top 4 Sort Tabs (Best, Cheapest, Fastest, Sort dropdown) */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xs grid grid-cols-4 divide-x divide-gray-100">
-        
-        {/* Tab 1: Best (Active Orange) */}
-        <button
-          onClick={() => onSortChange('best')}
-          className={`p-3 sm:py-3.5 sm:px-4 text-left transition-all ${
-            sortBy === 'best'
-              ? 'bg-[#FF5722] text-white shadow-inner'
-              : 'hover:bg-gray-50 text-gray-900'
-          }`}
-        >
-          <div className="text-xs sm:text-sm font-bold">Best</div>
-          <div className="text-base sm:text-lg font-black tracking-tight leading-snug">₹72,299</div>
-          <div className={`text-[11px] sm:text-xs font-medium ${sortBy === 'best' ? 'text-white/90' : 'text-gray-500'}`}>
-            6h 20m (avg)
-          </div>
-        </button>
-
-        {/* Tab 2: Cheapest */}
-        <button
-          onClick={() => onSortChange('cheapest')}
-          className={`p-3 sm:py-3.5 sm:px-4 text-left transition-all ${
-            sortBy === 'cheapest'
-              ? 'bg-[#FF5722] text-white shadow-inner'
-              : 'hover:bg-gray-50 text-gray-900'
-          }`}
-        >
-          <div className="text-xs sm:text-sm font-bold">Cheapest</div>
-          <div className="text-base sm:text-lg font-black tracking-tight leading-snug">₹59,725</div>
-          <div className={`text-[11px] sm:text-xs font-medium ${sortBy === 'cheapest' ? 'text-white/90' : 'text-gray-500'}`}>
-            14h 30m (avg)
-          </div>
-        </button>
-
-        {/* Tab 3: Fastest */}
-        <button
-          onClick={() => onSortChange('fastest')}
-          className={`p-3 sm:py-3.5 sm:px-4 text-left transition-all ${
-            sortBy === 'fastest'
-              ? 'bg-[#FF5722] text-white shadow-inner'
-              : 'hover:bg-gray-50 text-gray-900'
-          }`}
-        >
-          <div className="text-xs sm:text-sm font-bold">Fastest</div>
-          <div className="text-base sm:text-lg font-black tracking-tight leading-snug">₹144,983</div>
-          <div className={`text-[11px] sm:text-xs font-medium ${sortBy === 'fastest' ? 'text-white/90' : 'text-gray-500'}`}>
-            6h 20m (avg)
-          </div>
-        </button>
-
-        {/* Tab 4: Sort Dropdown */}
-        <div className="p-3 sm:py-3.5 sm:px-4 flex items-center justify-between text-gray-700 hover:bg-gray-50 cursor-pointer">
-          <span className="text-xs sm:text-sm font-bold">Sort</span>
-          <ChevronDown className="w-4 h-4 text-gray-500" />
-        </div>
-
-      </div>
-
-      {/* Flyhigh Picks Banner */}
-      <div className="bg-[#FFF3EC] border border-[#FFE2D4] rounded-2xl p-4 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-            <Globe className="w-5 h-5 text-[#FF5722]" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-gray-900">See the world differently</h4>
-            <p className="text-xs text-gray-600 mt-0.5">
-              More flight options, better fares and flexible travel, only on Flyhigh.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-orange-300 bg-white/70 text-[#FF5722] text-xs font-bold shrink-0 self-end sm:self-center">
-          <span>☆</span>
-          <span>Flyhigh Picks</span>
-        </div>
-      </div>
-
-      {/* Flight Cards List */}
-      <div className="space-y-3.5">
-        {flights.map((flight) => {
-          const isFavorited = favorites[flight.key];
-          const isAirIndia = flight.carrier === 'AI';
-
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-xs flex flex-wrap">
+        {SORTS.map((sort) => {
+          const active = sortBy?.key === sort.key;
+          const Icon = sortBy?.dir === 'desc' ? ChevronDown : ChevronUp;
           return (
-            <div
-              key={flight.key}
-              className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-gray-300 transition-all group relative"
+            <button
+              key={sort.key}
+              type="button"
+              onClick={() => onSortChange(sort.key)}
+              aria-pressed={active}
+              className={`flex-1 min-w-[96px] min-h-11 px-3 py-3 text-left text-sm font-bold border-r border-gray-100 last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FF5722] ${
+                active ? 'text-[#FF5722]' : 'text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                
-                {/* Left/Middle: Airline Info & Flight Legs */}
-                <div className="flex-1 space-y-4">
-                  
-                  {/* Airline Header Row */}
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={flight.logo}
-                      alt={flight.carrierName}
-                      className="h-6 sm:h-7 object-contain max-w-[100px]"
-                    />
-                    <span className="font-bold text-gray-900 text-sm sm:text-base">
-                      {flight.carrierName}
-                    </span>
-                  </div>
-
-                  {/* Outbound Leg */}
-                  <div className="flex items-center justify-between sm:justify-start sm:space-x-8 text-sm">
-                    {/* Departure */}
-                    <div className="w-18 sm:w-20">
-                      <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">
-                        {flight.outbound.departureTime}
-                      </div>
-                      <div className="text-xs font-semibold text-gray-500">
-                        {flight.outbound.fromCode}
-                      </div>
-                    </div>
-
-                    {/* Flight Path Graphic */}
-                    <div className="flex-1 max-w-[180px] sm:max-w-[220px] text-center">
-                      <div className="text-xs font-medium text-gray-500">
-                        {flight.outbound.duration}
-                      </div>
-                      
-                      <div className="relative my-1 flex items-center">
-                        <div className="w-full h-[1.5px] bg-gray-300"></div>
-                        <ArrowRight className="w-3.5 h-3.5 text-gray-400 absolute right-0" />
-                      </div>
-
-                      <div className={`text-xs font-bold ${flight.outbound.stops === 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
-                        {flight.outbound.stopType}
-                      </div>
-                    </div>
-
-                    {/* Arrival */}
-                    <div className="w-20 sm:w-24 text-right sm:text-left">
-                      <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">
-                        {flight.outbound.arrivalTime}
-                        {flight.outbound.dayOffset && (
-                          <span className="text-xs font-bold text-gray-700 align-super ml-0.5">
-                            {flight.outbound.dayOffset}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs font-semibold text-gray-500">
-                        {flight.outbound.toCode}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Inbound Leg (Return) */}
-                  <div className="flex items-center justify-between sm:justify-start sm:space-x-8 text-sm pt-1 border-t border-gray-100/70">
-                    {/* Departure */}
-                    <div className="w-18 sm:w-20">
-                      <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">
-                        {flight.inbound.departureTime}
-                      </div>
-                      <div className="text-xs font-semibold text-gray-500">
-                        {flight.inbound.fromCode}
-                      </div>
-                    </div>
-
-                    {/* Flight Path Graphic */}
-                    <div className="flex-1 max-w-[180px] sm:max-w-[220px] text-center">
-                      <div className="text-xs font-medium text-gray-500">
-                        {flight.inbound.duration}
-                      </div>
-                      
-                      <div className="relative my-1 flex items-center">
-                        <div className="w-full h-[1.5px] bg-gray-300"></div>
-                        <ArrowRight className="w-3.5 h-3.5 text-gray-400 absolute right-0" />
-                      </div>
-
-                      <div className={`text-xs font-bold ${flight.inbound.stops === 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
-                        {flight.inbound.stopType}
-                      </div>
-                    </div>
-
-                    {/* Arrival */}
-                    <div className="w-20 sm:w-24 text-right sm:text-left">
-                      <div className="text-lg sm:text-xl font-black text-gray-900 leading-tight">
-                        {flight.inbound.arrivalTime}
-                      </div>
-                      <div className="text-xs font-semibold text-gray-500">
-                        {flight.inbound.toCode}
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Right: Price & CTA Button */}
-                <div className="lg:border-l lg:border-gray-150 lg:pl-6 pt-3 lg:pt-0 flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center shrink-0 space-y-2">
-                  
-                  {/* Heart wishlist button in card */}
-                  <button
-                    onClick={(e) => toggleFavorite(flight.key, e)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors p-1"
-                  >
-                    <Heart
-                      className={`w-5 h-5 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`}
-                    />
-                  </button>
-
-                  <div className="text-left lg:text-right">
-                    <div className="text-[11px] text-gray-500 font-medium">Return per traveller from</div>
-                    <div className="text-xl sm:text-2xl font-black text-[#FF5722] tracking-tight">
-                      {flight.formattedPrice}
-                    </div>
-                  </div>
-
-                  {/* Select button: Air India has vibrant orange button `#FF5722`, others have dark navy `#0F2038` as in mockup */}
-                  <button
-                    onClick={() => onSelectFlight(flight)}
-                    className={`flex items-center justify-center space-x-1.5 px-6 py-2.5 rounded-xl font-bold text-sm shadow-sm transition active:scale-[0.98] ${
-                      isAirIndia
-                        ? 'bg-[#FF5722] hover:bg-[#E64A19] text-white shadow-orange-500/20'
-                        : 'bg-[#0F2038] hover:bg-[#1A2E4C] text-white'
-                    }`}
-                  >
-                    <span>Select</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
+              <span className="inline-flex items-center gap-1">
+                {sort.label}
+                {active && <Icon className="w-3.5 h-3.5" aria-hidden="true" />}
+              </span>
+            </button>
           );
         })}
       </div>
 
+      <div className="bg-[#FF5722] rounded-2xl p-4 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0">
+            <Globe className="w-5 h-5 text-[#FF5722]" aria-hidden="true" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white">See the world differently</h3>
+            <p className="text-xs text-white/85 mt-0.5">More flight options, better fares and flexible travel, only on Flyhigh.</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#FDB813] text-gray-950 text-xs font-bold shrink-0">
+          <span aria-hidden="true">☆</span>
+          <span>Flyhigh Picks</span>
+        </div>
+      </div>
+
+      {flights.length === 0 ? (
+        <div className="bg-white border border-dashed border-gray-300 rounded-2xl p-8 text-center">
+          <h3 className="text-base font-bold text-gray-900">No flights match these filters</h3>
+          <p className="text-sm text-gray-500 mt-1">Try another time, airline, or stop count.</p>
+          {filtersActive && (
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="mt-4 min-h-11 px-5 rounded-xl bg-[#FF5722] text-white text-sm font-bold hover:bg-[#E64A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FF5722]"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3.5">
+          {flights.map((flight) => {
+            const outbound = flight.outbound || flight;
+            const oneWay = !flight.inbound;
+            return (
+              <article
+                key={flight.key}
+                className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-gray-300 transition-all"
+              >
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
+                  <div className="flex-1 min-w-0 space-y-4">
+                    <div className="flex items-center space-x-3">
+                      {flight.logo ? (
+                        <img src={flight.logo} alt="" className="h-6 sm:h-7 object-contain max-w-[100px]" />
+                      ) : null}
+                      <div className="min-w-0">
+                        <div className="font-bold text-gray-900 text-sm sm:text-base">{flight.carrierName}</div>
+                        {flight.flightNumber && (
+                          <div className="text-xs font-semibold text-gray-500">{flight.flightNumber}</div>
+                        )}
+                      </div>
+                    </div>
+                    <Leg leg={outbound} />
+                    {flight.inbound && (
+                      <div className="pt-1 border-t border-gray-100">
+                        <Leg leg={flight.inbound} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="lg:border-l lg:border-gray-200 lg:pl-5 pt-3 lg:pt-0 flex flex-col gap-3 shrink-0 lg:w-[220px]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 text-left">
+                        <div className="text-[11px] text-gray-500 font-medium leading-snug">
+                          {oneWay ? (flight.fareCondition || 'Total fare') : 'Return per traveller from'}
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black text-[#E64A19] tracking-tight leading-none mt-1">
+                          {flight.formattedPrice}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(event) => toggleFavorite(flight.key, event)}
+                        aria-label={favorites[flight.key] ? 'Remove from saved flights' : 'Save flight'}
+                        aria-pressed={Boolean(favorites[flight.key])}
+                        className="shrink-0 -mt-1.5 -mr-1.5 w-11 h-11 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5722]"
+                      >
+                        <Heart className={`w-5 h-5 ${favorites[flight.key] ? 'fill-red-500 text-red-500' : ''}`} />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onSelectFlight(flight)}
+                      className="min-h-11 w-full flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl font-bold text-sm bg-[#FF5722] hover:bg-[#E64A19] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FF5722]"
+                    >
+                      <span>{oneWay ? 'View prices' : 'Select'}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
