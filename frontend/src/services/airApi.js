@@ -1,4 +1,5 @@
 import { AIRPORTS, FREQUENT_AIRPORTS } from '../data/airports';
+import { localLowFares, localSearch } from '../data/localFlights';
 
 export async function fetchAirports(query = '') {
   try {
@@ -61,7 +62,7 @@ export async function fetchLowFares(origin, destination, searchDate) {
   } catch (err) {
     console.warn('Low fare strip API error:', err);
   }
-  return [];
+  return localLowFares(origin, destination, searchDate);
 }
 
 export async function searchFlights(searchParams) {
@@ -73,12 +74,12 @@ export async function searchFlights(searchParams) {
     });
     if (res.ok) {
       const data = await res.json();
-      return data.data;
+      if (data?.data) return data.data;
     }
   } catch (err) {
     console.warn('Search flight API error:', err);
   }
-  return null;
+  return localSearch(searchParams);
 }
 
 export async function fetchAirPrice(flightKey) {
